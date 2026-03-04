@@ -15,7 +15,7 @@ Para instalar la extensión durante esta fase beta, sigue estos pasos:
     *   Elige el archivo `.vsix` descargado.
 3.  **Reiniciar**: Se recomienda reiniciar VS Code tras la instalación.
 
-## ## Configuración Paso a Paso
+## Configuración Paso a Paso
 
 ### 1. Preparar Supabase
 1. Crea un proyecto gratuito en [Supabase](https://supabase.com).
