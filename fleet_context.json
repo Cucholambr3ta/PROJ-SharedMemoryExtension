@@ -1,11 +1,16 @@
 {
     "project": "PROJ-SharedMemoryExtension",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "agents": [
         {
             "id": "0000",
             "role": "Mando Supremo",
             "status": "Asignado"
+        },
+        {
+            "id": "0002",
+            "role": "El Escriba",
+            "status": "Supervisor Documental"
         },
         {
             "id": "0005",
@@ -15,9 +20,9 @@
         {
             "id": "0007",
             "role": "Analista de Riesgo",
-            "status": "Consultor"
+            "status": "Auditor de Seguridad"
         }
     ],
-    "status": "Fase de Inicialización",
-    "last_updated": "2026-03-03"
+    "status": "OPERATIVO (Fleet V2)",
+    "last_updated": "2026-03-04"
 }
