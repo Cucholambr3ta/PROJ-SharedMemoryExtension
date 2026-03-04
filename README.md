@@ -1,20 +1,21 @@
-<<<<<<< HEAD
-# PROJ-SharedMemoryExtension
-Extensión de VS Code para memoria compartida entre agentes de IA mediante el protocolo MCP y persistencia en Supabase (BYODB).
-=======
 # Shared Memory MCP (Supabase BYODB) 🛸
 
 Extensión de VS Code que permite a agentes de IA (Roo Code, Cline, Cursor) compartir memoria persistente y comunicarse entre equipos utilizando el protocolo **MCP** y tu propia instancia de **Supabase** (Modelo BYODB - Bring Your Own Database).
 
-## Características principales
-- **Privacidad Total**: No hay servidores intermedios. Tu IA se conecta directamente a TU base de datos.
-- **Seguridad**: Las llaves de API se almacenan de forma segura en el llavero de tu sistema operativo (SecretStorage).
-- **Multimáquina/Equipo**: Comparte el contexto entre diferentes computadoras de la flota.
-- **Sistema de Presencia (Heartbeat)**: Visualiza quién está online y su estado actual.
-- **Mensajería de Flota**: Envía alertas, comandos o mensajes a usuarios específicos (`target_id`) o a todo el equipo (`ALL`).
-- **Notificaciones Nativas**: Recibe alertas en VS Code cuando otros miembros de la flota te envíen mensajes.
+## 🚀 Guía de Instalación para Beta Testers
 
-## Configuración Paso a Paso
+Para instalar la extensión durante esta fase beta, sigue estos pasos:
+
+1.  **Descargar el instalador**: Obtén el archivo `shared-memory-mcp-1.0.0.vsix` del repositorio o de la carpeta del proyecto.
+2.  **Instalar en VS Code**:
+    *   Abre VS Code.
+    *   Ve a la vista de **Extensiones** (`Ctrl+Shift+X`).
+    *   Haz clic en los **tres puntos (`...`)** en la parte superior derecha del panel.
+    *   Selecciona **"Install from VSIX..."**.
+    *   Elige el archivo `.vsix` descargado.
+3.  **Reiniciar**: Se recomienda reiniciar VS Code tras la instalación.
+
+## ## Configuración Paso a Paso
 
 ### 1. Preparar Supabase
 1. Crea un proyecto gratuito en [Supabase](https://supabase.com).
@@ -29,6 +30,14 @@ Extensión de VS Code que permite a agentes de IA (Roo Code, Cline, Cursor) comp
 ### 3. Conectar tu IA (Roo Code / Cline)
 1. Ejecuta el comando `Shared Memory: Copiar configuración MCP para Roo/Cline`.
 2. Pega el JSON resultante en tu archivo de configuración de MCP (ej. `roo_code_custom_settings.json`).
+
+## Características principales
+- **Privacidad Total**: No hay servidores intermedios. Tu IA se conecta directamente a TU base de datos.
+- **Seguridad**: Las llaves de API se almacenan de forma segura en el llavero de tu sistema operativo (SecretStorage).
+- **Multimáquina/Equipo**: Comparte el contexto entre diferentes computadoras de la flota.
+- **Sistema de Presencia (Heartbeat)**: Visualiza quién está online y su estado actual.
+- **Mensajería de Flota**: Envía alertas, comandos o mensajes a usuarios específicos (`target_id`) o a todo el equipo (`ALL`).
+- **Notificaciones Nativas**: Recibe alertas en VS Code cuando otros miembros de la flota te envíen mensajes.
 
 ## Herramientas MCP Incluidas
 - `save_memory`: Guarda datos importantes que la IA recordará en el futuro.
@@ -45,4 +54,3 @@ Extensión de VS Code que permite a agentes de IA (Roo Code, Cline, Cursor) comp
 ---
 
 Desarrollado por [OLYMP-IA](https://olymp-ia.cl) · Supremacía Digital
->>>>>>> cf9096c (feat: actualización a Fleet V2 con sistema de presencia, heartbeat y mensajería dirigida)
