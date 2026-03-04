@@ -1,2 +1,48 @@
+<<<<<<< HEAD
 # PROJ-SharedMemoryExtension
 Extensión de VS Code para memoria compartida entre agentes de IA mediante el protocolo MCP y persistencia en Supabase (BYODB).
+=======
+# Shared Memory MCP (Supabase BYODB) 🛸
+
+Extensión de VS Code que permite a agentes de IA (Roo Code, Cline, Cursor) compartir memoria persistente y comunicarse entre equipos utilizando el protocolo **MCP** y tu propia instancia de **Supabase** (Modelo BYODB - Bring Your Own Database).
+
+## Características principales
+- **Privacidad Total**: No hay servidores intermedios. Tu IA se conecta directamente a TU base de datos.
+- **Seguridad**: Las llaves de API se almacenan de forma segura en el llavero de tu sistema operativo (SecretStorage).
+- **Multimáquina/Equipo**: Comparte el contexto entre diferentes computadoras de la flota.
+- **Sistema de Presencia (Heartbeat)**: Visualiza quién está online y su estado actual.
+- **Mensajería de Flota**: Envía alertas, comandos o mensajes a usuarios específicos (`target_id`) o a todo el equipo (`ALL`).
+- **Notificaciones Nativas**: Recibe alertas en VS Code cuando otros miembros de la flota te envíen mensajes.
+
+## Configuración Paso a Paso
+
+### 1. Preparar Supabase
+1. Crea un proyecto gratuito en [Supabase](https://supabase.com).
+2. En VS Code, ejecuta el comando `Shared Memory: Generar SQL de inicialización`.
+3. Copia el SQL generado y ejecútalo en el **SQL Editor** de tu dashboard de Supabase.
+
+### 2. Configurar la Extensión
+1. Ejecuta el comando `Shared Memory: Configurar Supabase`.
+2. Ingresa la URL de tu proyecto y tu `service_role` key (segura).
+3. Ajusta tu **Machine ID** (ej. "Laptop-Olympia") y tu **Status** en los ajustes de VS Code.
+
+### 3. Conectar tu IA (Roo Code / Cline)
+1. Ejecuta el comando `Shared Memory: Copiar configuración MCP para Roo/Cline`.
+2. Pega el JSON resultante en tu archivo de configuración de MCP (ej. `roo_code_custom_settings.json`).
+
+## Herramientas MCP Incluidas
+- `save_memory`: Guarda datos importantes que la IA recordará en el futuro.
+- `search_memory`: Busca en el historial de conocimientos compartidos.
+- `list_fleet_nodes`: Lista todos los participantes de la flota, su estado y si están online.
+- `send_fleet_message`: Envía mensajes directos o globales (`target_id: "ALL"`).
+- `read_fleet_messages`: Consulta los mensajes dirigidos a tu ID o globales.
+
+## Configuraciones Avanzadas
+- **Heartbeat Interval**: Frecuencia (en segundos) con la que VS Code actualiza tu presencia.
+- **Auto Read Messages**: Habilita notificaciones automáticas para mensajes entrantes.
+- **Retention Days**: Días de historial de mensajes a conservar en la base de datos.
+
+---
+
+Desarrollado por [OLYMP-IA](https://olymp-ia.cl) · Supremacía Digital
+>>>>>>> cf9096c (feat: actualización a Fleet V2 con sistema de presencia, heartbeat y mensajería dirigida)

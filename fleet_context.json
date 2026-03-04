@@ -1,0 +1,23 @@
+{
+    "project": "PROJ-SharedMemoryExtension",
+    "version": "1.0.0",
+    "agents": [
+        {
+            "id": "0000",
+            "role": "Mando Supremo",
+            "status": "Asignado"
+        },
+        {
+            "id": "0005",
+            "role": "Validador Ético",
+            "status": "Consultor"
+        },
+        {
+            "id": "0007",
+            "role": "Analista de Riesgo",
+            "status": "Consultor"
+        }
+    ],
+    "status": "Fase de Inicialización",
+    "last_updated": "2026-03-03"
+}
