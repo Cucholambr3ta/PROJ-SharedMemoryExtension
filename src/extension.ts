@@ -60,19 +60,82 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         const config = {
-            "shared-memory-supabase": {
-                "command": "node",
-                "args": [serverPath],
-                "env": {
-                    "SUPABASE_URL": url,
-                    "SUPABASE_SERVICE_KEY": key,
-                    "MACHINE_ID": machineId || "Agente-Anonimo"
-                }
+            "command": "node",
+            "args": [serverPath],
+            "env": {
+                "SUPABASE_URL": url,
+                "SUPABASE_SERVICE_KEY": key,
+                "MACHINE_ID": machineId || "Agente-Anonimo"
             }
         };
 
-        await vscode.env.clipboard.writeText(JSON.stringify(config, null, 2));
+        await vscode.env.clipboard.writeText(JSON.stringify({ "shared-memory-supabase": config }, null, 2));
         vscode.window.showInformationMessage('Configuración MCP completa (JSON) copiada. Pégala en tu archivo de configuración de Roo Code o Cline.');
+    });
+
+    // Comando para AUTO-CONFIGURAR MCP (Busca e inyecta)
+    let autoConfigMcp = vscode.commands.registerCommand('shared-memory-mcp.autoConfigMcp', async () => {
+        const url = vscode.workspace.getConfiguration('sharedMemoryMcp').get('supabaseUrl') as string;
+        const machineId = vscode.workspace.getConfiguration('sharedMemoryMcp').get('machineId') as string;
+        const key = await context.secrets.get('supabaseServiceKey');
+        const serverPath = path.join(context.extensionPath, 'dist', 'mcp-server', 'index.js');
+
+        if (!url || !key) {
+            vscode.window.showErrorMessage('Primero configura tu Supabase usando el comando "Shared Memory: Configurar Supabase".');
+            return;
+        }
+
+        const fs = require('fs-extra');
+        const os = require('os');
+
+        // Determinar posibles rutas del archivo de configuración (Antigravity y Roo Code)
+        const homeDir = os.homedir();
+        let configPaths: string[] = [];
+
+        // 1. Antigravity (Linux/Mac)
+        configPaths.push(path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'));
+
+        // 2. Roo Code / Cline
+        if (process.platform === 'win32') {
+            configPaths.push(path.join(process.env.APPDATA || '', 'Roaming', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+        } else if (process.platform === 'darwin') {
+            configPaths.push(path.join(homeDir, 'Library', 'Application Support', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+        } else {
+            configPaths.push(path.join(homeDir, '.config', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+        }
+
+        let updatedFiles = 0;
+
+        for (const configPath of configPaths) {
+            try {
+                if (await fs.pathExists(configPath)) {
+                    let mcpConfig = await fs.readJson(configPath, { throws: false });
+                    if (!mcpConfig) mcpConfig = {};
+                    if (!mcpConfig.mcpServers) mcpConfig.mcpServers = {};
+
+                    mcpConfig.mcpServers['shared-memory-supabase'] = {
+                        "command": "node",
+                        "args": [serverPath],
+                        "env": {
+                            "SUPABASE_URL": url,
+                            "SUPABASE_SERVICE_KEY": key,
+                            "MACHINE_ID": machineId || "Agente-Anonimo"
+                        }
+                    };
+
+                    await fs.writeJson(configPath, mcpConfig, { spaces: 2 });
+                    updatedFiles++;
+                }
+            } catch (error) {
+                console.error(`Error actualizando ${configPath}`, error);
+            }
+        }
+
+        if (updatedFiles > 0) {
+            vscode.window.showInformationMessage(`¡Éxito! La configuración MCP se ha inyectado automáticamente en ${updatedFiles} cliente(s) (Antigravity/Roo).`);
+        } else {
+            vscode.window.showWarningMessage('No se encontraron archivos de configuración de Antigravity o Roo Code automáticamente. Usa el comando manual para copiar el JSON.');
+        }
     });
 
     // Comando para generar el SQL de inicialización

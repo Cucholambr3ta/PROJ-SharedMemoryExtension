@@ -36,13 +36,19 @@ Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio 
 ### 3. Conectar tu IA (Añadir Servidor MCP)
 Para que clientes robustos como **Antigravity, Roo Code o Cline** puedan acceder a la base de datos de conocimientos:
 
+**Método Recomendado: Automático**
 1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
-2. Escribe y ejecuta el comando: `Shared Memory: Copiar configuración MCP para Roo/Cline`. *(Esto generará el código necesario cargado con la ruta de la aplicación y tus credenciales apuntando a Supabase, copiándolo silenciosamente a tu portapapeles)*.
+2. Escribe y ejecuta el comando: `Shared Memory: Auto-Configurar Cliente MCP (Recomendado)`. *El sistema buscará automáticamente las carpetas de Antigravity, Roo Code o Cline en tu computadora e inyectará la configuración.*
+
+**Método Alternativo: Manual (Portapapeles)**
+*Si el método automático no detecta tus archivos de configuración, sigue estos pasos:*
+1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
+2. Escribe y ejecuta el comando: `Shared Memory: Copiar configuración MCP para Roo/Cline`. *(Esto generará el código necesario, copiándolo silenciosamente a tu portapapeles)*.
 3. Abre el archivo de configuración del cliente MCP:
-   - **Antigravity (Linux)**: `~/.gemini/antigravity/mcp_config.json`
+   - **Antigravity (Linux)**: `~/.gemini/antigravity/mcp_config.json` *(¡No lo ejecutes en consola, ábrelo con Nano o VS Code!)*
    - **Roo Code / Cline (VS Code)**: Presiona de nuevo la Paleta de Comandos, busca *Roo Code: Edit MCP Settings* o navega manualmente:
       - **Windows**: `%APPDATA%\Roaming\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
-      - **macOS**: `~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
+      - **macOS**: `~/Library/Application Support/Code/User/globalStorage\rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
       - **Linux**: `~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
 4. Pega el JSON que copiaste **dentro** de la lista `"mcpServers"`. Tu archivo final debería verse parecido a esto:
    ```json
