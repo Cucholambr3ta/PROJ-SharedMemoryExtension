@@ -111,6 +111,15 @@ CREATE TABLE IF NOT EXISTS public.fleet_nodes (
 CREATE INDEX IF NOT EXISTS idx_memories_content ON public.shared_memories USING GIN (to_tsvector('spanish', content));
 CREATE INDEX IF NOT EXISTS idx_fleet_messages_target ON public.fleet_messages (target_id);
 CREATE INDEX IF NOT EXISTS idx_fleet_messages_status ON public.fleet_messages (status);
+
+-- 🔒 Seguridad de Datos (RLS)
+-- Habilitamos RLS en todas las tablas expuestas en el esquema public.
+-- Puesto que el MCP usa la service_role (que bypassa RLS), no necesitamos crear políticas
+-- que permitan el acceso público (anon/authenticated). Esto previene fugas
+-- de datos si la base de datos se expone por accidente en su API pública (PostgREST).
+ALTER TABLE public.shared_memories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.fleet_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.fleet_nodes ENABLE ROW LEVEL SECURITY;
 `;
         const doc = await vscode.workspace.openTextDocument({ content: sql, language: 'sql' });
         await vscode.window.showTextDocument(doc);
