@@ -30,8 +30,10 @@ Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio 
 ### 2. Configurar la Extensión
 1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
 2. Escribe y ejecuta el comando: `Shared Memory: Configurar Supabase`.
-3. Ingresa la URL de tu proyecto y tu `service_role` key (segura).
-4. Ajusta tu **Machine ID** (ej. "Laptop-Olympia") y tu **Status** en los ajustes de VS Code.
+3. El asistente te mostrará 3 ventanas. Deberás ingresar:
+   * **URL** de tu proyecto Supabase.
+   * **Service Role Key** secreta.
+   * **Nombre o Identificador** (ej. "Juan-Marketing", "Laptop-PC"). *Este será tu nombre en la base de datos para que el resto de la flota sepa quién está aportando conocimientos.*
 
 ### 3. Conectar tu IA (Añadir Servidor MCP)
 Para que clientes robustos como **Antigravity, Roo Code o Cline** puedan acceder a la base de datos de conocimientos:
