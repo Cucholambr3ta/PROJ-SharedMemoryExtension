@@ -23,17 +23,20 @@ Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio 
 
 ### 1. Preparar Supabase
 1. Crea un proyecto gratuito en [Supabase](https://supabase.com).
-2. En VS Code, ejecuta el comando `Shared Memory: Generar SQL de inicialización`.
-3. Copia el SQL generado y ejecútalo en el **SQL Editor** de tu dashboard de Supabase.
+2. Abre la **Paleta de Comandos** en VS Code / Antigravity (`Ctrl+Shift+P` o `Cmd+Shift+P` en macOS).
+3. Escribe y ejecuta el comando: `Shared Memory: Generar SQL de inicialización`.
+4. Copia el SQL generado y ejecútalo en el **SQL Editor** de tu dashboard de Supabase.
 
 ### 2. Configurar la Extensión
-1. Ejecuta el comando `Shared Memory: Configurar Supabase`.
-2. Ingresa la URL de tu proyecto y tu `service_role` key (segura).
-3. Ajusta tu **Machine ID** (ej. "Laptop-Olympia") y tu **Status** en los ajustes de VS Code.
+1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
+2. Escribe y ejecuta el comando: `Shared Memory: Configurar Supabase`.
+3. Ingresa la URL de tu proyecto y tu `service_role` key (segura).
+4. Ajusta tu **Machine ID** (ej. "Laptop-Olympia") y tu **Status** en los ajustes de VS Code.
 
 ### 3. Conectar tu IA (Roo Code / Cline)
-1. Ejecuta el comando `Shared Memory: Copiar configuración MCP para Roo/Cline`.
-2. Pega el JSON resultante en tu archivo de configuración de MCP (ej. `roo_code_custom_settings.json`).
+1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
+2. Escribe y ejecuta el comando: `Shared Memory: Copiar configuración MCP para Roo/Cline`.
+3. Pega el JSON resultante en tu archivo de configuración de MCP (ej. `roo_code_custom_settings.json`).
 
 ## Características principales
 - **Privacidad Total**: No hay servidores intermedios. Tu IA se conecta directamente a TU base de datos.
