@@ -33,10 +33,33 @@ Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio 
 3. Ingresa la URL de tu proyecto y tu `service_role` key (segura).
 4. Ajusta tu **Machine ID** (ej. "Laptop-Olympia") y tu **Status** en los ajustes de VS Code.
 
-### 3. Conectar tu IA (Roo Code / Cline)
+### 3. Conectar tu IA (Añadir Servidor MCP)
+Para que clientes robustos como **Antigravity, Roo Code o Cline** puedan acceder a la base de datos de conocimientos:
+
 1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
-2. Escribe y ejecuta el comando: `Shared Memory: Copiar configuración MCP para Roo/Cline`.
-3. Pega el JSON resultante en tu archivo de configuración de MCP (ej. `roo_code_custom_settings.json`).
+2. Escribe y ejecuta el comando: `Shared Memory: Copiar configuración MCP para Roo/Cline`. *(Esto generará el código necesario cargado con la ruta de la aplicación y tus credenciales apuntando a Supabase, copiándolo silenciosamente a tu portapapeles)*.
+3. Abre el archivo de configuración del cliente MCP:
+   - **Antigravity (Linux)**: `~/.gemini/antigravity/mcp_config.json`
+   - **Roo Code / Cline (VS Code)**: Presiona de nuevo la Paleta de Comandos, busca *Roo Code: Edit MCP Settings* o navega manualmente:
+      - **Windows**: `%APPDATA%\Roaming\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
+      - **macOS**: `~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
+      - **Linux**: `~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
+4. Pega el JSON que copiaste **dentro** de la lista `"mcpServers"`. Tu archivo final debería verse parecido a esto:
+   ```json
+   {
+     "mcpServers": {
+       "shared-memory-supabase": {
+         "command": "node",
+         "args": [".../mcp-server/index.js"],
+         "env": {
+           "SUPABASE_URL": "...",
+           "SUPABASE_SERVICE_KEY": "..."
+         }
+       }
+     }
+   }
+   ```
+5. Guarda el archivo y el cliente reconocerá la extensión automáticamente.
 
 ## Características principales
 - **Privacidad Total**: No hay servidores intermedios. Tu IA se conecta directamente a TU base de datos.
