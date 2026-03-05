@@ -1,9 +1,9 @@
 {
     "name": "shared-memory-mcp",
-    "displayName": "Shared Memory MCP (Supabase BYODB)",
-    "description": "Memoria compartida para agentes de IA (Roo Code, Cline, Cursor) usando el protocolo MCP y tu propio Supabase.",
-    "version": "1.0.0",
-    "publisher": "Olymp-ia",
+    "displayName": "Shared Memory MCP (Olymp-ia)",
+    "description": "Herramienta que dota a las IAs en VS Code de una memoria compartida persistente y comunicación de flota nativa con Supabase.",
+    "version": "1.0.1",
+    "publisher": "Olympia",
     "license": "MIT",
     "icon": "icon.png",
     "repository": {
@@ -30,18 +30,13 @@
                 "category": "Shared Memory MCP"
             },
             {
-                "command": "shared-memory-mcp.copyServerPath",
-                "title": "Shared Memory: Copiar ruta del servidor para Roo/Cline",
+                "command": "shared-memory-mcp.switchProfile",
+                "title": "Shared Memory: Cambiar de Base de Datos Activa",
                 "category": "Shared Memory MCP"
             },
             {
-                "command": "shared-memory-mcp.copyMcpConfig",
-                "title": "Shared Memory: Copiar configuración MCP para Roo/Cline",
-                "category": "Shared Memory MCP"
-            },
-            {
-                "command": "shared-memory-mcp.autoConfigMcp",
-                "title": "Shared Memory: Auto-Configurar Cliente MCP (Recomendado)",
+                "command": "shared-memory-mcp.removeProfile",
+                "title": "Shared Memory: Eliminar Perfil de Base de Datos",
                 "category": "Shared Memory MCP"
             },
             {

@@ -27,47 +27,23 @@ Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio 
 3. Escribe y ejecuta el comando: `Shared Memory: Generar SQL de inicialización`.
 4. Copia el SQL generado y ejecútalo en el **SQL Editor** de tu dashboard de Supabase.
 
-### 2. Configurar la Extensión
+### 2. Configurar e Inyectar la Extensión
 1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
 2. Escribe y ejecuta el comando: `Shared Memory: Configurar Supabase`.
-3. El asistente te mostrará 3 ventanas. Deberás ingresar:
+3. El asistente te mostrará 4 ventanas. Deberás ingresar:
+   * **Nombre de Perfil** (ej. "Flota Principal", "Proyecto B").
    * **URL** de tu proyecto Supabase.
    * **Service Role Key** secreta.
-   * **Nombre o Identificador** (ej. "Juan-Marketing", "Laptop-PC"). *Este será tu nombre en la base de datos para que el resto de la flota sepa quién está aportando conocimientos.*
+   * **Nombre o Identificador** (ej. "Juan-Marketing", "Laptop-PC"). *Este será tu nombre en esta base de datos para que el resto de la flota sepa quién está aportando conocimientos.*
+4. ¡Listo! La extensión configurará el acceso para este perfil **e inyectará automáticamente** la conexión a los clientes de tu entorno (ej. Antigravity, Roo Code o Cline). 
 
-### 3. Conectar tu IA (Añadir Servidor MCP)
-Para que clientes robustos como **Antigravity, Roo Code o Cline** puedan acceder a la base de datos de conocimientos:
-
-**Método Recomendado: Automático**
-1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
-2. Escribe y ejecuta el comando: `Shared Memory: Auto-Configurar Cliente MCP (Recomendado)`. *El sistema buscará automáticamente las carpetas de Antigravity, Roo Code o Cline en tu computadora e inyectará la configuración.*
-
-**Método Alternativo: Manual (Portapapeles)**
-*Si el método automático no detecta tus archivos de configuración, sigue estos pasos:*
-1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
-2. Escribe y ejecuta el comando: `Shared Memory: Copiar configuración MCP para Roo/Cline`. *(Esto generará el código necesario, copiándolo silenciosamente a tu portapapeles)*.
-3. Abre el archivo de configuración del cliente MCP:
-   - **Antigravity (Linux)**: `~/.gemini/antigravity/mcp_config.json` *(¡No lo ejecutes en consola, ábrelo con Nano o VS Code!)*
-   - **Roo Code / Cline (VS Code)**: Presiona de nuevo la Paleta de Comandos, busca *Roo Code: Edit MCP Settings* o navega manualmente:
-      - **Windows**: `%APPDATA%\Roaming\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json`
-      - **macOS**: `~/Library/Application Support/Code/User/globalStorage\rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
-      - **Linux**: `~/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`
-4. Pega el JSON que copiaste **dentro** de la lista `"mcpServers"`. Tu archivo final debería verse parecido a esto:
-   ```json
-   {
-     "mcpServers": {
-       "shared-memory-supabase": {
-         "command": "node",
-         "args": [".../mcp-server/index.js"],
-         "env": {
-           "SUPABASE_URL": "...",
-           "SUPABASE_SERVICE_KEY": "..."
-         }
-       }
-     }
-   }
-   ```
-5. Guarda el archivo y el cliente reconocerá la extensión automáticamente.
+### 3. (Opcional) Multi-Base de Datos: Cambiar de Flota
+Si colaboras con múltiples equipos o proyectos, puedes conectarte a diferentes bases de datos Supabase:
+1. Simplemente repite el "Paso 2" para agregar una nueva flota. Tus credenciales se guardarán bajo su propio Perfil.
+2. Para cambiar sobre la marcha a qué base de datos está conectada tu IA, ejecuta el comando de VS Code:
+   `Shared Memory: Cambiar de Base de Datos Activa`
+3. Esto pausará tu presencia en la base de datos anterior e "inyectará" de inmediato a tu IA a la nueva flota en 1 segundo.
+4. Para eliminar perfiles antiguos, usa: `Shared Memory: Eliminar Perfil de Base de Datos`.
 
 ## Características principales
 - **Privacidad Total**: No hay servidores intermedios. Tu IA se conecta directamente a TU base de datos.

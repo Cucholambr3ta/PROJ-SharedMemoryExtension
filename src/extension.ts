@@ -1,11 +1,18 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as os from 'os';
+import * as fs from 'fs-extra';
 import { createClient } from '@supabase/supabase-js';
 
 let heartbeatTimer: NodeJS.Timeout | undefined;
 let messageListenerTimer: NodeJS.Timeout | undefined;
 let lastMessageCheck: string = new Date().toISOString();
+
+interface Profile {
+    name: string;
+    url: string;
+    machineId: string;
+}
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('La extensión "Shared Memory MCP" está activa.');
@@ -14,139 +21,128 @@ export function activate(context: vscode.ExtensionContext) {
     startHeartbeat(context);
     startMessageListener(context);
 
-    // Comando para configurar Supabase
+    // Comando para configurar/crear un nuevo Perfil Supabase
     let setupSupabase = vscode.commands.registerCommand('shared-memory-mcp.setupSupabase', async () => {
+        const profileName = await vscode.window.showInputBox({
+            prompt: "Ingresa un Nombre para este Perfil de Base de Datos (ej. 'Flota-Principal', 'Proyecto-B')",
+            placeHolder: "Flota-Principal",
+            ignoreFocusOut: true
+        });
+        if (!profileName) return;
+
         const url = await vscode.window.showInputBox({
             prompt: "Ingresa la URL de tu proyecto de Supabase (ej. https://xyz.supabase.co)",
             placeHolder: "https://your-project.supabase.co",
             ignoreFocusOut: true
         });
-
         if (!url) return;
 
         const key = await vscode.window.showInputBox({
-            prompt: "Ingresa tu 'service_role' key de Supabase (Se guardará de forma segura)",
+            prompt: "Ingresa tu 'service_role' key de Supabase (Se guardará de forma secreta para este perfil)",
             password: true,
             ignoreFocusOut: true
         });
-
         if (!key) return;
 
         const defaultName = os.hostname() || "Agente-Desconocido";
         const machineId = await vscode.window.showInputBox({
-            prompt: "Ingresa tu Nombre o Identificador (Ej. Dev-Olympia, PC-Casa). Esto se verá en la base de datos.",
+            prompt: "Ingresa tu Nombre o Identificador para ESTA flota (Ej. Dev-Olympia).",
             placeHolder: defaultName,
             value: defaultName,
             ignoreFocusOut: true
         });
-
         if (!machineId) return;
 
-        // Guardar configuración global
+        // Recuperar y actualizar lista de perfiles
+        let profiles: Profile[] = context.globalState.get('profiles', []);
+        profiles = profiles.filter(p => p.name !== profileName);
+        profiles.push({ name: profileName, url, machineId });
+
+        await context.globalState.update('profiles', profiles);
+        await context.globalState.update('activeProfile', profileName);
+
+        // Guardar Key en SecretStorage prefijado por el nombre del perfil
+        await context.secrets.store(`supabaseServiceKey_${profileName}`, key);
+
+        // Además, actualizamos la vieja config global por retrocompatibilidad/visualización sencilla si es necesario.
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('supabaseUrl', url, vscode.ConfigurationTarget.Global);
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('machineId', machineId, vscode.ConfigurationTarget.Global);
 
-        // Guardar Key en SecretStorage (encriptado por el OS)
-        await context.secrets.store('supabaseServiceKey', key);
+        // Reiniciar servicios con el nuevo perfil
+        startHeartbeat(context);
+        startMessageListener(context);
 
-        vscode.window.showInformationMessage(`¡Configuración de Supabase guardada exitosamente para ${machineId}!`);
+        await injectMcpConfig(context, url, key, machineId, profileName);
     });
 
-    // Comando para copiar la ruta del servidor MCP al portapapeles
-    let copyServerPath = vscode.commands.registerCommand('shared-memory-mcp.copyServerPath', async () => {
-        const serverPath = path.join(context.extensionPath, 'dist', 'mcp-server', 'index.js');
-        await vscode.env.clipboard.writeText(serverPath);
-        vscode.window.showInformationMessage(`Ruta del servidor copiada: ${serverPath}. Pégala en la configuración de Roo Code o Cline.`);
-    });
+    // Comando para CAMBIAR de perfil
+    let switchProfile = vscode.commands.registerCommand('shared-memory-mcp.switchProfile', async () => {
+        const profiles: Profile[] = context.globalState.get('profiles', []);
 
-    // Comando para copiar la CONFIGURACIÓN MCP COMPLETA (con secretos)
-    let copyMcpConfig = vscode.commands.registerCommand('shared-memory-mcp.copyMcpConfig', async () => {
-        const url = vscode.workspace.getConfiguration('sharedMemoryMcp').get('supabaseUrl') as string;
-        const machineId = vscode.workspace.getConfiguration('sharedMemoryMcp').get('machineId') as string;
-        const key = await context.secrets.get('supabaseServiceKey');
-        const serverPath = path.join(context.extensionPath, 'dist', 'mcp-server', 'index.js');
-
-        if (!url || !key) {
-            vscode.window.showErrorMessage('Primero configura tu Supabase usando el comando "Shared Memory: Configurar Supabase".');
+        if (profiles.length === 0) {
+            vscode.window.showInformationMessage("No tienes perfiles configurados. Usa 'Shared Memory: Configurar Supabase' primero.");
             return;
         }
 
-        const config = {
-            "command": "node",
-            "args": [serverPath],
-            "env": {
-                "SUPABASE_URL": url,
-                "SUPABASE_SERVICE_KEY": key,
-                "MACHINE_ID": machineId || "Agente-Anonimo"
-            }
-        };
+        const activeProfile = context.globalState.get('activeProfile', '');
+        const items = profiles.map(p => ({
+            label: p.name === activeProfile ? `$(check) ${p.name}` : p.name,
+            description: p.url,
+            profile: p
+        }));
 
-        await vscode.env.clipboard.writeText(JSON.stringify({ "shared-memory-supabase": config }, null, 2));
-        vscode.window.showInformationMessage('Configuración MCP completa (JSON) copiada. Pégala en tu archivo de configuración de Roo Code o Cline.');
-    });
+        const selected = await vscode.window.showQuickPick(items, {
+            placeHolder: "Selecciona el Perfil (Flota de Agentes) a conectar",
+            ignoreFocusOut: true
+        });
 
-    // Comando para AUTO-CONFIGURAR MCP (Busca e inyecta)
-    let autoConfigMcp = vscode.commands.registerCommand('shared-memory-mcp.autoConfigMcp', async () => {
-        const url = vscode.workspace.getConfiguration('sharedMemoryMcp').get('supabaseUrl') as string;
-        const machineId = vscode.workspace.getConfiguration('sharedMemoryMcp').get('machineId') as string;
-        const key = await context.secrets.get('supabaseServiceKey');
-        const serverPath = path.join(context.extensionPath, 'dist', 'mcp-server', 'index.js');
+        if (!selected) return;
 
-        if (!url || !key) {
-            vscode.window.showErrorMessage('Primero configura tu Supabase usando el comando "Shared Memory: Configurar Supabase".');
+        const prof = selected.profile;
+        await context.globalState.update('activeProfile', prof.name);
+
+        await vscode.workspace.getConfiguration('sharedMemoryMcp').update('supabaseUrl', prof.url, vscode.ConfigurationTarget.Global);
+        await vscode.workspace.getConfiguration('sharedMemoryMcp').update('machineId', prof.machineId, vscode.ConfigurationTarget.Global);
+
+        const key = await context.secrets.get(`supabaseServiceKey_${prof.name}`);
+        if (!key) {
+            vscode.window.showErrorMessage(`No se encontró el secreto guardado para el perfil ${prof.name}. configúralo de nuevo.`);
             return;
         }
 
-        const fs = require('fs-extra');
-        const os = require('os');
+        startHeartbeat(context);
+        startMessageListener(context);
 
-        // Determinar posibles rutas del archivo de configuración (Antigravity y Roo Code)
-        const homeDir = os.homedir();
-        let configPaths: string[] = [];
+        await injectMcpConfig(context, prof.url, key, prof.machineId, prof.name);
+    });
 
-        // 1. Antigravity (Linux/Mac)
-        configPaths.push(path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'));
+    // Comando para ELIMINAR un perfil
+    let removeProfile = vscode.commands.registerCommand('shared-memory-mcp.removeProfile', async () => {
+        const profiles: Profile[] = context.globalState.get('profiles', []);
 
-        // 2. Roo Code / Cline
-        if (process.platform === 'win32') {
-            configPaths.push(path.join(process.env.APPDATA || '', 'Roaming', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
-        } else if (process.platform === 'darwin') {
-            configPaths.push(path.join(homeDir, 'Library', 'Application Support', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
-        } else {
-            configPaths.push(path.join(homeDir, '.config', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+        if (profiles.length === 0) {
+            vscode.window.showInformationMessage("No hay perfiles para eliminar.");
+            return;
         }
 
-        let updatedFiles = 0;
+        const items = profiles.map(p => p.name);
+        const selected = await vscode.window.showQuickPick(items, {
+            placeHolder: "Selecciona el Perfil que deseas ELIMINAR de forma permanente",
+            ignoreFocusOut: true
+        });
 
-        for (const configPath of configPaths) {
-            try {
-                if (await fs.pathExists(configPath)) {
-                    let mcpConfig = await fs.readJson(configPath, { throws: false });
-                    if (!mcpConfig) mcpConfig = {};
-                    if (!mcpConfig.mcpServers) mcpConfig.mcpServers = {};
+        if (!selected) return;
 
-                    mcpConfig.mcpServers['shared-memory-supabase'] = {
-                        "command": "node",
-                        "args": [serverPath],
-                        "env": {
-                            "SUPABASE_URL": url,
-                            "SUPABASE_SERVICE_KEY": key,
-                            "MACHINE_ID": machineId || "Agente-Anonimo"
-                        }
-                    };
+        const newProfiles = profiles.filter(p => p.name !== selected);
+        await context.globalState.update('profiles', newProfiles);
+        await context.secrets.delete(`supabaseServiceKey_${selected}`); // Limpiar secreto
 
-                    await fs.writeJson(configPath, mcpConfig, { spaces: 2 });
-                    updatedFiles++;
-                }
-            } catch (error) {
-                console.error(`Error actualizando ${configPath}`, error);
-            }
-        }
-
-        if (updatedFiles > 0) {
-            vscode.window.showInformationMessage(`¡Éxito! La configuración MCP se ha inyectado automáticamente en ${updatedFiles} cliente(s) (Antigravity/Roo).`);
+        let activeProfile = context.globalState.get('activeProfile', '');
+        if (activeProfile === selected) {
+            await context.globalState.update('activeProfile', '');
+            vscode.window.showWarningMessage(`Eliminaste el perfil activo: ${selected}. Por favor cambia a otro perfil.`);
         } else {
-            vscode.window.showWarningMessage('No se encontraron archivos de configuración de Antigravity o Roo Code automáticamente. Usa el comando manual para copiar el JSON.');
+            vscode.window.showInformationMessage(`Perfil ${selected} eliminado.`);
         }
     });
 
@@ -188,10 +184,6 @@ CREATE INDEX IF NOT EXISTS idx_fleet_messages_target ON public.fleet_messages (t
 CREATE INDEX IF NOT EXISTS idx_fleet_messages_status ON public.fleet_messages (status);
 
 -- 🔒 Seguridad de Datos (RLS)
--- Habilitamos RLS en todas las tablas expuestas en el esquema public.
--- Puesto que el MCP usa la service_role (que bypassa RLS), no necesitamos crear políticas
--- que permitan el acceso público (anon/authenticated). Esto previene fugas
--- de datos si la base de datos se expone por accidente en su API pública (PostgREST).
 ALTER TABLE public.shared_memories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fleet_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fleet_nodes ENABLE ROW LEVEL SECURITY;
@@ -200,16 +192,74 @@ ALTER TABLE public.fleet_nodes ENABLE ROW LEVEL SECURITY;
         await vscode.window.showTextDocument(doc);
     });
 
-    context.subscriptions.push(setupSupabase, copyServerPath, generateSql, copyMcpConfig);
+    context.subscriptions.push(setupSupabase, switchProfile, removeProfile, generateSql);
+}
+
+// --- FUNCION DE INYECCION CONSOLIDADA ---
+async function injectMcpConfig(context: vscode.ExtensionContext, url: string, key: string, machineId: string, profileName: string) {
+    const serverPath = path.join(context.extensionPath, 'dist', 'mcp-server', 'index.js');
+    const homeDir = os.homedir();
+    let configPaths: string[] = [];
+
+    // 1. Antigravity (Linux/Mac)
+    configPaths.push(path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'));
+
+    // 2. Roo Code / Cline
+    if (process.platform === 'win32') {
+        configPaths.push(path.join(process.env.APPDATA || '', 'Roaming', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+    } else if (process.platform === 'darwin') {
+        configPaths.push(path.join(homeDir, 'Library', 'Application Support', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+    } else {
+        configPaths.push(path.join(homeDir, '.config', 'Code', 'User', 'globalStorage', 'rooveterinaryinc.roo-cline', 'settings', 'cline_mcp_settings.json'));
+    }
+
+    let updatedFiles = 0;
+
+    for (const configPath of configPaths) {
+        try {
+            if (await fs.pathExists(configPath)) {
+                let mcpConfig = await fs.readJson(configPath, { throws: false });
+                if (!mcpConfig) mcpConfig = {};
+                if (!mcpConfig.mcpServers) mcpConfig.mcpServers = {};
+
+                mcpConfig.mcpServers['shared-memory-supabase'] = {
+                    "command": "node",
+                    "args": [serverPath],
+                    "env": {
+                        "SUPABASE_URL": url,
+                        "SUPABASE_SERVICE_KEY": key,
+                        "MACHINE_ID": machineId || "Agente-Anonimo"
+                    }
+                };
+
+                await fs.writeJson(configPath, mcpConfig, { spaces: 2 });
+                updatedFiles++;
+            }
+        } catch (error) {
+            console.error(`Error actualizando ${configPath}`, error);
+        }
+    }
+
+    if (updatedFiles > 0) {
+        vscode.window.showInformationMessage(`¡Conectado! El esquema [${profileName}] fue inyectado correctamente en ${updatedFiles} cliente(s) (Antigravity/Roo)`);
+    } else {
+        vscode.window.showWarningMessage(`Perfil [${profileName}] guardado. No detectamos clientes MCP estándar, por lo que tú serás el único que se comunique con esta flota a través del panel normal.`);
+    }
 }
 
 // --- FUNCIONES DE SOPORTE (HEARTBEAT & MESSAGING) ---
 
 async function getSupabaseClient(context: vscode.ExtensionContext) {
-    const url = vscode.workspace.getConfiguration('sharedMemoryMcp').get('supabaseUrl') as string;
-    const key = await context.secrets.get('supabaseServiceKey');
-    if (!url || !key) return null;
-    return createClient(url, key);
+    const activeProfileName = context.globalState.get('activeProfile', '');
+    if (!activeProfileName) return null; // No profile active
+
+    const profiles: Profile[] = context.globalState.get('profiles', []);
+    const prof = profiles.find(p => p.name === activeProfileName);
+    if (!prof) return null;
+
+    const key = await context.secrets.get(`supabaseServiceKey_${prof.name}`);
+    if (!prof.url || !key) return null;
+    return createClient(prof.url, key);
 }
 
 function startHeartbeat(context: vscode.ExtensionContext) {
@@ -219,9 +269,13 @@ function startHeartbeat(context: vscode.ExtensionContext) {
         const supabase = await getSupabaseClient(context);
         if (!supabase) return;
 
-        const config = vscode.workspace.getConfiguration('sharedMemoryMcp');
-        const machineId = config.get('machineId') as string;
-        const status = config.get('status') as string;
+        const activeProfileName = context.globalState.get('activeProfile', '');
+        const profiles: Profile[] = context.globalState.get('profiles', []);
+        const prof = profiles.find(p => p.name === activeProfileName);
+        if (!prof) return;
+
+        const machineId = prof.machineId;
+        const status = vscode.workspace.getConfiguration('sharedMemoryMcp').get('status') as string || 'Activo';
 
         await supabase.from('fleet_nodes').upsert({
             machine_id: machineId,
@@ -246,7 +300,12 @@ function startMessageListener(context: vscode.ExtensionContext) {
         const supabase = await getSupabaseClient(context);
         if (!supabase) return;
 
-        const machineId = config.get('machineId') as string;
+        const activeProfileName = context.globalState.get('activeProfile', '');
+        const profiles: Profile[] = context.globalState.get('profiles', []);
+        const prof = profiles.find(p => p.name === activeProfileName);
+        if (!prof) return;
+
+        const machineId = prof.machineId;
 
         const { data, error } = await supabase
             .from('fleet_messages')
@@ -264,7 +323,7 @@ function startMessageListener(context: vscode.ExtensionContext) {
         }
     };
 
-    // Polling cada 30 segundos para mensajes (balanceado)
+    // Polling cada 30 segundos
     messageListenerTimer = setInterval(checkMessages, 30000);
 }
 
