@@ -4,16 +4,20 @@ Extensión de VS Code que permite a agentes de IA (Roo Code, Cline, Cursor) comp
 
 ## 🚀 Guía de Instalación para Beta Testers
 
-Para instalar la extensión durante esta fase beta, sigue estos pasos:
+Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio Code, Cursor o Antigravity), sigue estos pasos:
 
-1.  **Descargar el instalador**: Obtén el archivo `shared-memory-mcp-1.0.0.vsix` del repositorio o de la carpeta del proyecto.
-2.  **Instalar en VS Code**:
-    *   Abre VS Code.
-    *   Ve a la vista de **Extensiones** (`Ctrl+Shift+X`).
+### Método A: Instalación por Visor (Antigravity / VS Code)
+1.  **Descargar el instalador**: Obtén el archivo `shared-memory-mcp-1.0.0.vsix` del repositorio principal.
+2.  **Instalar desde la UI**:
+    *   Ve a la vista de **Extensiones**.
     *   Haz clic en los **tres puntos (`...`)** en la parte superior derecha del panel.
-    *   Selecciona **"Install from VSIX..."**.
-    *   Elige el archivo `.vsix` descargado.
-3.  **Reiniciar**: Se recomienda reiniciar VS Code tras la instalación.
+    *   Selecciona **"Install from VSIX..."** y elige el archivo descargado.
+
+### Método B: Instalación por Terminal (Recomendado para Antigravity)
+- Ejecuta el siguiente comando en tu terminal para instalarlo directamente:
+  ```bash
+  antigravity --install-extension /Ruta/Hacia/shared-memory-mcp-1.0.0.vsix
+  ```
 
 ## Configuración Paso a Paso
 
