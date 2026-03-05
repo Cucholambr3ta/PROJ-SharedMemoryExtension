@@ -86,8 +86,14 @@ function activate(context) {
         profiles.push({ name: profileName, url, machineId });
         await context.globalState.update('profiles', profiles);
         await context.globalState.update('activeProfile', profileName);
-        // Guardar Key en SecretStorage prefijado por el nombre del perfil
-        await context.secrets.store(`supabaseServiceKey_${profileName}`, key);
+        // Guardar Key en SecretStorage prefijado por el nombre del perfil (con fallback iterativo a globalState en sistemas GNU/Linux sin anillo criptográfico)
+        try {
+            await context.secrets.store(`supabaseServiceKey_${profileName}`, key);
+        }
+        catch (error) {
+            console.warn("SecretStorage falló, guardando en globalState", error);
+            await context.globalState.update(`fallback_key_${profileName}`, key);
+        }
         // Además, actualizamos la vieja config global por retrocompatibilidad/visualización sencilla si es necesario.
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('supabaseUrl', url, vscode.ConfigurationTarget.Global);
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('machineId', machineId, vscode.ConfigurationTarget.Global);
@@ -119,7 +125,10 @@ function activate(context) {
         await context.globalState.update('activeProfile', prof.name);
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('supabaseUrl', prof.url, vscode.ConfigurationTarget.Global);
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('machineId', prof.machineId, vscode.ConfigurationTarget.Global);
-        const key = await context.secrets.get(`supabaseServiceKey_${prof.name}`);
+        let key = await context.secrets.get(`supabaseServiceKey_${prof.name}`);
+        if (!key) {
+            key = context.globalState.get(`fallback_key_${prof.name}`);
+        }
         if (!key) {
             vscode.window.showErrorMessage(`No se encontró el secreto guardado para el perfil ${prof.name}. configúralo de nuevo.`);
             return;
@@ -144,7 +153,13 @@ function activate(context) {
             return;
         const newProfiles = profiles.filter(p => p.name !== selected);
         await context.globalState.update('profiles', newProfiles);
-        await context.secrets.delete(`supabaseServiceKey_${selected}`); // Limpiar secreto
+        try {
+            await context.secrets.delete(`supabaseServiceKey_${selected}`); // Limpiar secreto
+        }
+        catch (error) {
+            // Ignorar error si SecretStorage no está disponible
+        }
+        await context.globalState.update(`fallback_key_${selected}`, undefined); // Limpiar fallback
         let activeProfile = context.globalState.get('activeProfile', '');
         if (activeProfile === selected) {
             await context.globalState.update('activeProfile', '');
@@ -260,7 +275,10 @@ async function getSupabaseClient(context) {
     const prof = profiles.find(p => p.name === activeProfileName);
     if (!prof)
         return null;
-    const key = await context.secrets.get(`supabaseServiceKey_${prof.name}`);
+    let key = await context.secrets.get(`supabaseServiceKey_${prof.name}`);
+    if (!key) {
+        key = context.globalState.get(`fallback_key_${prof.name}`);
+    }
     if (!prof.url || !key)
         return null;
     return (0, supabase_js_1.createClient)(prof.url, key);
