@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as os from 'os';
 import { createClient } from '@supabase/supabase-js';
 
 let heartbeatTimer: NodeJS.Timeout | undefined;
@@ -31,13 +32,24 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (!key) return;
 
-        // Guardar URL en configuración global
+        const defaultName = os.hostname() || "Agente-Desconocido";
+        const machineId = await vscode.window.showInputBox({
+            prompt: "Ingresa tu Nombre o Identificador (Ej. Dev-Olympia, PC-Casa). Esto se verá en la base de datos.",
+            placeHolder: defaultName,
+            value: defaultName,
+            ignoreFocusOut: true
+        });
+
+        if (!machineId) return;
+
+        // Guardar configuración global
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('supabaseUrl', url, vscode.ConfigurationTarget.Global);
+        await vscode.workspace.getConfiguration('sharedMemoryMcp').update('machineId', machineId, vscode.ConfigurationTarget.Global);
 
         // Guardar Key en SecretStorage (encriptado por el OS)
         await context.secrets.store('supabaseServiceKey', key);
 
-        vscode.window.showInformationMessage('¡Configuración de Supabase guardada exitosamente!');
+        vscode.window.showInformationMessage(`¡Configuración de Supabase guardada exitosamente para ${machineId}!`);
     });
 
     // Comando para copiar la ruta del servidor MCP al portapapeles

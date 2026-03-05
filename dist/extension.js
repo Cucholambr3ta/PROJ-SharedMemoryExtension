@@ -37,6 +37,7 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
+const os = __importStar(require("os"));
 const supabase_js_1 = require("@supabase/supabase-js");
 let heartbeatTimer;
 let messageListenerTimer;
@@ -62,11 +63,21 @@ function activate(context) {
         });
         if (!key)
             return;
-        // Guardar URL en configuración global
+        const defaultName = os.hostname() || "Agente-Desconocido";
+        const machineId = await vscode.window.showInputBox({
+            prompt: "Ingresa tu Nombre o Identificador (Ej. Dev-Olympia, PC-Casa). Esto se verá en la base de datos.",
+            placeHolder: defaultName,
+            value: defaultName,
+            ignoreFocusOut: true
+        });
+        if (!machineId)
+            return;
+        // Guardar configuración global
         await vscode.workspace.getConfiguration('sharedMemoryMcp').update('supabaseUrl', url, vscode.ConfigurationTarget.Global);
+        await vscode.workspace.getConfiguration('sharedMemoryMcp').update('machineId', machineId, vscode.ConfigurationTarget.Global);
         // Guardar Key en SecretStorage (encriptado por el OS)
         await context.secrets.store('supabaseServiceKey', key);
-        vscode.window.showInformationMessage('¡Configuración de Supabase guardada exitosamente!');
+        vscode.window.showInformationMessage(`¡Configuración de Supabase guardada exitosamente para ${machineId}!`);
     });
     // Comando para copiar la ruta del servidor MCP al portapapeles
     let copyServerPath = vscode.commands.registerCommand('shared-memory-mcp.copyServerPath', async () => {
