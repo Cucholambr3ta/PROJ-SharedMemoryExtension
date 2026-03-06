@@ -20,29 +20,34 @@
     "categories": [
         "Other"
     ],
-    "activationEvents": [],
+    "activationEvents": [
+        "onCommand:shared-memory-mcp.setupSupabase",
+        "onCommand:shared-memory-mcp.switchProfile",
+        "onCommand:shared-memory-mcp.removeProfile",
+        "onCommand:shared-memory-mcp.generateSql"
+    ],
     "main": "./dist/extension.js",
     "contributes": {
         "commands": [
             {
                 "command": "shared-memory-mcp.setupSupabase",
-                "title": "Shared Memory: Configurar Supabase",
-                "category": "Shared Memory MCP"
+                "title": "Configurar Supabase",
+                "category": "Shared Memory"
             },
             {
                 "command": "shared-memory-mcp.switchProfile",
-                "title": "Shared Memory: Cambiar de Base de Datos Activa",
-                "category": "Shared Memory MCP"
+                "title": "Cambiar de Base de Datos Activa",
+                "category": "Shared Memory"
             },
             {
                 "command": "shared-memory-mcp.removeProfile",
-                "title": "Shared Memory: Eliminar Perfil de Base de Datos",
-                "category": "Shared Memory MCP"
+                "title": "Eliminar Perfil de Base de Datos",
+                "category": "Shared Memory"
             },
             {
                 "command": "shared-memory-mcp.generateSql",
-                "title": "Shared Memory: Generar SQL de inicialización",
-                "category": "Shared Memory MCP"
+                "title": "Generar SQL de inicialización",
+                "category": "Shared Memory"
             }
         ],
         "configuration": {
