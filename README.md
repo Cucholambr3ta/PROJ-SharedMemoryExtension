@@ -1,8 +1,8 @@
-# Shared Memory: Divine Essence 🛸
+# Shared Memory: Divine Essence
 
 Extensión de nivel empresarial que dota a la flota de una memoria persistente universal y comunicación inter-agente de alta fidelidad utilizando el protocolo **MCP** y **Supabase** (Modelo BYODB).
 
-## 🚀 Guía de Instalación para Beta Testers
+## Guía de Instalación para Beta Testers
 
 Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio Code, Cursor o Antigravity), sigue estos pasos:
 
