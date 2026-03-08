@@ -3,7 +3,7 @@
     "displayName": "Shared Memory: Divine Essence (Olymp-ia)",
     "description": "Protocolo de memoria compartida persistente y comunicación de flota divina vía Supabase.",
     "version": "1.0.2",
-    "publisher": "Olympia",
+    "publisher": "olymp-ia",
     "license": "MIT",
     "icon": "icon.png",
     "repository": {

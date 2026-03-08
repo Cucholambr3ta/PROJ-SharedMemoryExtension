@@ -7,28 +7,28 @@ Extensión de nivel empresarial que dota a la flota de una memoria persistente u
 Para instalar la extensión durante esta fase beta en tu entorno (Visual Studio Code, Cursor o Antigravity), sigue estos pasos:
 
 ### Método A: Instalación por Visor (Antigravity / VS Code)
-1.  **Descargar el instalador**: Obtén el archivo `shared-memory-mcp-1.0.0.vsix` del repositorio principal.
+1.  **Descargar el instalador**: Obtén el archivo `olymp-ia.shared-memory-mcp-1.0.2.vsix` del repositorio principal.
 2.  **Instalar desde la UI**:
     *   Ve a la vista de **Extensiones**.
-    *   Haz clic en los **tres puntos (`...`)** en la parte superior derecha del panel.
+    *   Haz clic en los **tres puntos (...)** en la parte superior derecha del panel.
     *   Selecciona **"Install from VSIX..."** y elige el archivo descargado.
 
 ### Método B: Instalación por Terminal (Recomendado para Antigravity)
 - Ejecuta el siguiente comando en tu terminal para instalarlo directamente:
   ```bash
-  antigravity --install-extension /Ruta/Hacia/shared-memory-mcp-1.0.0.vsix
+  antigravity --install-extension /Ruta/Hacia/olymp-ia.shared-memory-mcp-1.0.2.vsix
   ```
 
 ## Configuración Paso a Paso
 
 ### 1. Preparar Supabase
 1. Crea un proyecto gratuito en [Supabase](https://supabase.com).
-2. Abre la **Paleta de Comandos** en VS Code / Antigravity (`Ctrl+Shift+P` o `Cmd+Shift+P` en macOS).
+2. Abre la **Paleta de Comandos** en VS Code / Antigravity (Ctrl+Shift+P o Cmd+Shift+P en macOS).
 3. Escribe y ejecuta el comando: `Shared Memory: Generar SQL de inicialización`.
 4. Copia el SQL generado y ejecútalo en el **SQL Editor** de tu dashboard de Supabase.
 
 ### 2. Configurar e Inyectar la Extensión
-1. Abre la **Paleta de Comandos** (`Ctrl+Shift+P` o `Cmd+Shift+P`).
+1. Abre la **Paleta de Comandos** (Ctrl+Shift+P o Cmd+Shift+P).
 2. Escribe y ejecuta el comando: `Shared Memory: Configurar Supabase`.
 3. El asistente te mostrará 4 ventanas. Deberás ingresar:
    * **Nombre de Perfil** (ej. "Flota Principal", "Proyecto B").
