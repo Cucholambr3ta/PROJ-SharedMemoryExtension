@@ -1,9 +1,9 @@
-# Documentación Técnica — PROJ-SharedMemoryExtension
+# Documentación Técnica — Shared Memory: Divine Essence
 
 ## Resumen Arquitectónico
-La extensión opera como un puente entre el protocolo MCP (Model Context Protocol) y una instancia de Supabase proporcionada por el usuario (Modelo BYODB). Permite que múltiples instancias de agentes de IA (Antigravity, Roo Code, Cline) compartan una memoria persistente y sistema de mensajería de flota.
+La extensión opera como un puente de alta fidelidad entre el protocolo MCP y una instancia de Supabase de la flota. Como parte del ecosistema **OLYMP-IA Divine Fleet**, asegura la persistencia del conocimiento de nivel empresarial mediante el modelo BYODB.
 
-## Versión 1.0.2: Mejoras de Estabilidad y Multi-Base de Datos
+## Versión 1.0.2: Branding Inoculated & Stability
 
 ### 1. Soporte Multi-Perfil (Perfiles)
 La extensión ahora permite gestionar múltiples bases de datos Supabase de forma independiente:
