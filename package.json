@@ -1,7 +1,7 @@
 {
     "name": "shared-memory-mcp",
-    "displayName": "Shared Memory MCP (Olymp-ia)",
-    "description": "Herramienta que dota a las IAs en VS Code de una memoria compartida persistente y comunicación de flota nativa con Supabase.",
+    "displayName": "Shared Memory: Divine Essence (Olymp-ia)",
+    "description": "Protocolo de memoria compartida persistente y comunicación de flota divina vía Supabase.",
     "version": "1.0.2",
     "publisher": "Olympia",
     "license": "MIT",

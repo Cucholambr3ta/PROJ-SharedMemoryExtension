@@ -1,6 +1,6 @@
-# Shared Memory MCP (Supabase BYODB) 🛸
+# Shared Memory: Divine Essence 🛸
 
-Extensión de VS Code que permite a agentes de IA (Roo Code, Cline, Cursor) compartir memoria persistente y comunicarse entre equipos utilizando el protocolo **MCP** y tu propia instancia de **Supabase** (Modelo BYODB - Bring Your Own Database).
+Extensión de nivel empresarial que dota a la flota de una memoria persistente universal y comunicación inter-agente de alta fidelidad utilizando el protocolo **MCP** y **Supabase** (Modelo BYODB).
 
 ## 🚀 Guía de Instalación para Beta Testers
 

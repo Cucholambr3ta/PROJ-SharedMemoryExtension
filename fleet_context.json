@@ -13,6 +13,11 @@
             "status": "Supervisor Documental"
         },
         {
+            "id": "0003",
+            "role": "Artista Visual",
+            "status": "Asignado"
+        },
+        {
             "id": "0005",
             "role": "Validador Ético",
             "status": "Consultor"
@@ -23,6 +28,6 @@
             "status": "Auditor de Seguridad"
         }
     ],
-    "status": "OPERATIVO (v1.0.2 - Multi-Profile Support)",
-    "last_updated": "2026-03-06"
+    "status": "OPERATIVO — Branding Inoculated",
+    "last_updated": "2026-03-08"
 }
